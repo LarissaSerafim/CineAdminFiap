@@ -1,6 +1,5 @@
-// Importado modulo do create client no arquivo JS
-
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+// Importar o módulo createClient do arquivo JS
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // Configuração do Supabase
 const supabaseUrl = 'https://oqlkznbuefxvmycigqql.supabase.co/';
@@ -11,30 +10,46 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('loginForm');
 
-    loginForm.addEventListener('submit', function (event) {
+    loginForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
         const emailInput = document.getElementById('email');
         const userEmail = emailInput.value;
 
-        signInWithEmail(userEmail);
+        try {
+            await signInWithEmail(userEmail);
+        } catch (error) {
+            console.error('Erro ao fazer login:', error.message);
+        }
     });
 
-    async function signInWithEmail(userEmail) {
-        try {
-            const { data, error } = await supabase.auth.signInWithOtp({
-                email: userEmail,
-            });
+    async function signInWithEmail(email) {
+        const { error } = await supabase.auth.signIn({
+            email,
+        });
 
-            if (error) {
-                console.error(error.message);
-                alert('Erro ao enviar o link de acesso. Por favor, tente novamente.');
-            } else {
-                alert('Link de acesso enviado com sucesso. Verifique seu e-mail.');
-            }
-        } catch (error) {
-            console.error(error.message);
-            alert('Ocorreu um erro. Por favor, tente novamente.');
+        if (error) {
+            throw new Error('Erro ao fazer login: ' + error.message);
+        } else {
+            console.log('Login bem-sucedido!');
+            // Redirecionar para outra página, se necessário
+        }
+    }
+
+    async function signUpNewUser() {
+        const { data, error } = await supabase.auth.signUp({
+            email: 'example@email.com',
+            password: 'example-password',
+            options: {
+                emailRedirectTo: 'https://example.com/welcome',
+            },
+        });
+
+        if (error) {
+            throw new Error('Erro ao registrar usuário: ' + error.message);
+        } else {
+            console.log('Usuário registrado com sucesso!');
+            // Redirecionar para outra página, se necessário
         }
     }
 });
